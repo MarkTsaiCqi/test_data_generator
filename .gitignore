@@ -1,0 +1,8 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Generated files
+generated_images/
+generated_text/ 

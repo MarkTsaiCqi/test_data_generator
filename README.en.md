@@ -1,59 +1,59 @@
-# 测试数据生成器
+# Test Data Generator
 
-这是一个用于生成测试数据的 Python 工具集，可以生成各种格式的测试文件，包括图片、音频和文本。
+This is a Python toolset for generating test data, capable of creating various types of test files including images, audio, and text.
 
-## 功能特点
+## Features
 
-- 图片生成
-  - 随机颜色图片
-  - 渐变图片
-  - 支持多种格式（PNG, JPEG, BMP 等）
+- Image Generation
+  - Random color images
+  - Gradient images
+  - Support for multiple formats (PNG, JPEG, BMP, etc.)
 
-- 音频生成
-  - 正弦波音频
-  - 白噪声
-  - 支持 WAV 格式
+- Audio Generation
+  - Sine wave audio
+  - White noise
+  - WAV format support
 
-- 文本生成
-  - 随机文章
-  - 姓名列表
-  - 地址列表
-  - 支持多种语言
+- Text Generation
+  - Random articles
+  - Name lists
+  - Address lists
+  - Multi-language support
 
-## 安装依赖
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 使用方法
+## Usage
 
-1. 生成所有测试数据：
+1. Generate all test data:
 ```bash
 python main.py
 ```
 
-2. 单独生成某种类型的测试数据：
+2. Generate specific types of test data:
 ```bash
-# 生成图片
+# Generate images
 python image/generator.py
 
-# 生成音频
+# Generate audio
 python audio/generator.py
 
-# 生成文本
+# Generate text
 python text/generator.py
 ```
 
-## 输出目录
+## Output Directories
 
-生成的测试文件将保存在以下目录中：
-- 图片：`generated_images/`
-- 音频：`generated_audio/`
-- 文本：`generated_text/`
+Generated test files will be saved in the following directories:
+- Images: `generated_images/`
+- Audio: `generated_audio/`
+- Text: `generated_text/`
 
-## 注意事项
+## Notes
 
-- 生成的测试数据仅供测试使用
-- 音频生成需要安装额外的系统依赖（如 ffmpeg）
-- 文本生成支持多种语言，可以通过修改 Faker 的 locale 参数来切换 
+- Generated test data is for testing purposes only
+- Audio generation requires additional system dependencies (e.g., ffmpeg)
+- Text generation supports multiple languages, which can be switched by modifying the Faker locale parameter 
