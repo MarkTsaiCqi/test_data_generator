@@ -1,24 +1,57 @@
 import random
 import string
 import os
+import requests
+from faker import Faker
 from typing import List
 
 class TextGenerator:
     def __init__(self, output_dir="generated_text"):
         # Define all special characters and patterns
         self.special_chars = [
+            # SQL Injection - Single quote tests
+            "'",
+            "''",
+            '" OR 1=1 --',
+            "' OR '1'='1",
+            '" OR "1"="1"',
+            "' OR 1=1; --",
+            "' OR 'a'='a",
+            "') OR ('a'='a",
+            "') OR '1'='1' --",
+            
+            # SQL Injection - Destructive queries
+            "' OR 1=1; DROP TABLE users; --",
+            '" OR 1=1; UPDATE users SET password=\'hacked\' WHERE username=\'admin\'; --',
+            "'; DELETE FROM users WHERE 1=1; --",
+            
+            # SQL Injection - UNION-based
+            "' UNION SELECT 1,2,3,4,5 --",
+            '" UNION SELECT username, password FROM users --',
+            "' UNION SELECT null, null, version(), user() --",
+            
+            # XSS tests
+            "<script>alert('XSS!')</script>",
+            '"><script>alert(\'XSS\')</script>',
+            '<img src="x" onerror="alert(\'XSS\')">',
+            '<a href="javascript:alert(\'XSS\')">Click Me</a>',
+            '<svg onload=alert(\'XSS\')>',
+            
+            # Command Injection tests
+            "; ls -la",
+            "; rm -rf /",
+            "; cat /etc/passwd",
+            "`whoami`",
+            "$(id)",
+            "| echo HACKED",
+            
             # Basic special characters
             "!@#$%^&*()_+={}[]|\\:;\"'<>,.?/~`",
-            # SQL Injection patterns
-            "' OR '1'='1",
-            "'; DROP TABLE users; --",
-            "' UNION SELECT * FROM users; --",
-            # HTML special characters
-            "<script>alert('xss')</script>",
-            "<img src=x onerror=alert('xss')>",
+            
             # Special Unicode characters
             "你好世界",
             "👋🌍",
+            
             # Control characters
             "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F",
         ]
@@ -31,6 +64,9 @@ class TextGenerator:
             "or", "an", "will", "my", "one", "all", "would", "there", "their", "what",
             "so", "up", "out", "if", "about", "who", "get", "which", "go", "me"
         ]
+
+        # Initialize Faker
+        self.faker = Faker()
         
         # Create output directory if it doesn't exist
         self.output_dir = output_dir
@@ -46,73 +82,82 @@ class TextGenerator:
 
     def generate_special_chars(self) -> str:
         """Generate a string containing all special characters and alphanumeric characters."""
-        # Generate a name
-        name = "John_Doe"
+        # Combine all special characters and injection patterns
+        result = []
         
-        # All special characters
-        special = "!@#$%^&*()_+={}[]|\\:;\"'<>,.?/~`"
+        # Add basic special characters
+        result.append("John_Doe!@#$%^&*()_+={}[]|\\:;\"'<>,.?/~`1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
         
-        # Numbers
-        numbers = "1234567890"
+        # Add SQL Injection patterns
+        result.append("\n\nSQL Injection 測試：")
+        result.append("' OR '1'='1")
+        result.append("' OR 1=1; --")
+        result.append("'; DROP TABLE users; --")
+        result.append("' UNION SELECT * FROM users; --")
+        result.append("' OR 1=1; UPDATE users SET password='hacked' WHERE username='admin'; --")
+        result.append("' OR 'a'='a")
+        result.append("') OR ('a'='a")
+        result.append("') OR '1'='1' --")
+        result.append("' UNION SELECT 1,2,3,4,5 --")
+        result.append("' UNION SELECT username, password FROM users --")
+        result.append("' UNION SELECT null, null, version(), user() --")
         
-        # Lowercase letters
-        lowercase = "abcdefghijklmnopqrstuvwxyz"
+        # Add XSS patterns
+        result.append("\n\nXSS 測試：")
+        result.append("<script>alert('XSS!')</script>")
+        result.append('"><script>alert(\'XSS\')</script>')
+        result.append('<img src="x" onerror="alert(\'XSS\')">')
+        result.append('<a href="javascript:alert(\'XSS\')">Click Me</a>')
+        result.append('<svg onload=alert(\'XSS\')>')
         
-        # Uppercase letters
-        uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        # Add Command Injection patterns
+        result.append("\n\nCommand Injection 測試：")
+        result.append("; ls -la")
+        result.append("; rm -rf /")
+        result.append("; cat /etc/passwd")
+        result.append("`whoami`")
+        result.append("$(id)")
+        result.append("| echo HACKED")
         
-        # Combine all characters
-        return f"{name}{special}{numbers}{lowercase}{uppercase}"
+        # Add Unicode characters
+        result.append("\n\nUnicode 字元：")
+        result.append("你好世界")
+        result.append("👋🌍")
+        
+        return "\n".join(result)
+
+    def get_random_fact(self) -> str:
+        """Get a random fact from the useless facts API."""
+        try:
+            response = requests.get('https://uselessfacts.jsph.pl/api/v2/facts/random', timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            return data.get('text', '')
+        except Exception as e:
+            print(f"Error fetching random fact: {str(e)}")
+            return self.faker.text(max_nb_chars=100)  # Fallback to faker if API fails
 
     def generate_50_char_text(self) -> str:
-        """Generate a meaningful 50-character English text."""
-        words = []
-        current_length = 0
-        
-        while current_length < 50:
-            word = random.choice(self.common_words)
-            if current_length + len(word) + 1 <= 50:  # +1 for space
-                words.append(word)
-                current_length += len(word) + 1
-            else:
-                break
-        
-        return " ".join(words)
+        """Generate a meaningful English text using random facts API."""
+        return self.get_random_fact()
 
     def generate_5000_char_article(self) -> str:
-        """Generate a meaningful 5000-character English article."""
+        """Generate a meaningful 5000-character English article using faker."""
+        # Generate multiple paragraphs until we reach 5000 characters
         paragraphs = []
-        current_length = 0
+        total_length = 0
         
-        while current_length < 5000:
-            # Generate a paragraph
-            sentences = []
-            paragraph_length = 0
-            
-            while paragraph_length < 200:  # Average paragraph length
-                sentence = []
-                sentence_length = 0
-                
-                # Generate a sentence
-                while sentence_length < 50:  # Average sentence length
-                    word = random.choice(self.common_words)
-                    if sentence_length + len(word) + 1 <= 50:
-                        sentence.append(word)
-                        sentence_length += len(word) + 1
-                    else:
-                        break
-                
-                if sentence:
-                    sentence[0] = sentence[0].capitalize()
-                    sentence_text = " ".join(sentence) + ". "
-                    sentences.append(sentence_text)
-                    paragraph_length += len(sentence_text)
-            
-            paragraph = "".join(sentences)
+        while total_length < 5000:
+            # Generate a paragraph with a random number of sentences
+            paragraph = self.faker.paragraph(nb_sentences=random.randint(3, 8))
             paragraphs.append(paragraph)
-            current_length += len(paragraph)
+            total_length += len(paragraph) + 2  # +2 for newlines
         
-        return "\n\n".join(paragraphs)
+        # Join paragraphs with double newlines
+        text = "\n\n".join(paragraphs)
+        
+        # Trim to exactly 5000 characters
+        return text[:5000]
 
 def main():
     generator = TextGenerator()
