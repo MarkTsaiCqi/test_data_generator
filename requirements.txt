@@ -1,5 +1,7 @@
 Pillow==10.2.0  # 用于生成图片
 numpy==1.26.4   # 用于生成音频
 pydub==0.25.1   # 用于音频处理
-faker==22.6.0   # 用于生成文本
-python-dotenv==1.0.1 
+faker==37.1.0   # 用于生成文本
+python-dotenv==1.0.1
+requests==2.31.0  # 用于网络请求
+beautifulsoup4==4.12.3  # 用于解析HTML 
