@@ -5,4 +5,7 @@ __pycache__/
 
 # Generated files
 generated_images/
-generated_text/ 
+generated_text/
+
+# Virtual environment files
+venv/ 
