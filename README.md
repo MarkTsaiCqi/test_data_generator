@@ -4,12 +4,28 @@
 
 ## 功能特點
 
-- 生成不同長度的英文文字（50字元、5000字元）
-- 生成包含特殊字元的文字
-- 生成不同大小（1.9MB、2.0MB、2.1MB）的圖片
-- 生成不同解析度（1920x1080、3840x2160、800x600）的圖片
-- 支援圖片與 Base64 編碼的相互轉換
-- 生成不同長度的音頻檔案（5秒、10秒、15秒）
+- 生成不同長度的文本文件（1KB, 10KB, 100KB, 1MB）
+- 生成不同大小（基於 Python 腳本預設）的圖片，並嵌入文字標籤
+- （可選）生成不同長度的音頻檔案（需要恢復 audio 目錄及相關代碼）
+
+## 圖片與 Base64 轉換工具
+
+腳本 `scripts/image_converter.sh` 提供了圖片與 Base64 之間的轉換功能。
+
+用法:
+```bash
+# 1. 圖片轉 Base64
+./scripts/image_converter.sh image_to_base64 <圖片文件路徑> [輸出目錄]
+
+# 2. Base64 轉圖片
+./scripts/image_converter.sh base64_to_image <base64文件路徑> [輸出目錄]
+
+# 3. b64_json 轉圖片 (例如處理來自某些 API 的 JSON 格式)
+./scripts/image_converter.sh b64_json_to_image <json文件路徑> [輸出目錄]
+#   示例:
+./scripts/image_converter.sh b64_json_to_image scripts/example_image.json
+```
+- 輸出文件默認保存在腳本運行目錄下的 `generated_data` 子目錄中。
 
 ## 安裝說明
 
@@ -31,35 +47,37 @@ source venv/bin/activate
 3. 安裝依賴：
 ```bash
 pip install -r requirements.txt
+# 如果需要處理 b64_json，確保安裝了 jq
+# sudo apt-get install jq  (Debian/Ubuntu)
+# brew install jq        (macOS)
 ```
 
 ## 使用說明
 
 1. 確保虛擬環境已啟動（終端機提示符前應顯示 (venv)）
 
-2. 執行主腳本：
+2. 執行主生成腳本：
 ```bash
 ./generate_test_data.sh
 ```
+   - 此腳本會自動生成預設的文本和圖片測試數據。
 
-3. 根據選單選擇要執行的操作：
-   - 1: 生成所有測試文檔和圖檔
-   - 2: 生成Base64編碼的圖片
-   - 3: 從Base64檔案還原圖片
-   - 4: 退出
+3. （可選）使用圖片/Base64 轉換腳本：
+```bash
+cd scripts
+./image_converter.sh <操作類型> <輸入文件> [輸出目錄]
+```
 
 ## 注意事項
 
-- 每次打開新的終端機使用此工具時，都需要先執行 `source venv/bin/activate` 來啟動虛擬環境
-- 使用完畢後，可以執行 `deactivate` 來退出虛擬環境
-- 生成的檔案會保存在 `generated_data` 目錄下
+- 每次打開新的終端機使用此工具時，都需要先執行 `source venv/bin/activate` 來啟動虛擬環境。
+- 使用完畢後，可以執行 `deactivate` 來退出虛擬環境。
+- 生成的測試檔案會保存在 `generated_data` 目錄下。
 
 ## 依賴套件
 
-- Pillow==10.2.0：用於生成圖片
-- numpy==1.26.4：用於生成音頻
-- pydub==0.25.1：用於音頻處理
-- faker==37.1.0：用於生成文本
-- python-dotenv==1.0.1
-- requests==2.31.0：用於網絡請求
-- beautifulsoup4==4.12.3：用於解析HTML 
+- Pillow：用於生成圖片
+- numpy：用於生成音頻（如果恢復該功能）
+- pydub：用於音頻處理（如果恢復該功能）
+- faker：用於生成文本（如果恢復使用該腳本）
+- jq (外部工具)：用於處理 JSON (b64_json 轉換需要) 
