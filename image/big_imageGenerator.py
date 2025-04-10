@@ -31,16 +31,19 @@ def generate_image(target_size, filename, text):
     img = Image.fromarray(data, 'RGB')
     draw = ImageDraw.Draw(img)
     
-    # 添加文字
-    font = ImageFont.truetype("arial", 50)  # 使用更大的字體
-    textwidth, textheight = draw.textbbox((0, 0), text, font=font)[2:4]
-    text_x = (width - textwidth) / 2
-    text_y = (height - textheight) / 2
-    draw.text((text_x, text_y), text, font=font, fill=(255, 255, 255))  # 使用白色文字
+    try:
+        # 添加文字
+        font = ImageFont.truetype("arial", 50)  # 使用更大的字體
+        textwidth, textheight = draw.textbbox((0, 0), text, font=font)[2:4]
+        text_x = (width - textwidth) / 2
+        text_y = (height - textheight) / 2
+        draw.text((text_x, text_y), text, font=font, fill=(255, 255, 255))  # 使用白色文字
+    except Exception as e:
+        print(f"警告：無法加載字體或繪製文字：{str(e)}")
     
     # 調整圖像大小直到達到目標大小
+    output_path = os.path.join(args.output_dir, filename)
     for _ in range(100):  # 限制最大迭代次數
-        output_path = os.path.join(args.output_dir, filename)
         img.save(output_path, format='PNG', optimize=True)
         current_size = os.path.getsize(output_path)
         if abs(current_size - target_size) < 1024:  # 允許 1KB 的誤差

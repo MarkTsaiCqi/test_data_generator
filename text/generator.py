@@ -6,7 +6,7 @@ from faker import Faker
 from typing import List
 
 class TextGenerator:
-    def __init__(self, output_dir="generated_text"):
+    def __init__(self, output_dir="generated_data"):
         # Define all special characters and patterns
         self.special_chars = [
             # SQL Injection - Single quote tests
@@ -98,9 +98,6 @@ class TextGenerator:
         result.append("' OR 'a'='a")
         result.append("') OR ('a'='a")
         result.append("') OR '1'='1' --")
-        result.append("' UNION SELECT 1,2,3,4,5 --")
-        result.append("' UNION SELECT username, password FROM users --")
-        result.append("' UNION SELECT null, null, version(), user() --")
         
         # Add XSS patterns
         result.append("\n\nXSS 測試：")
@@ -120,77 +117,54 @@ class TextGenerator:
         result.append("| echo HACKED")
         
         # Add Unicode characters
-        result.append("\n\nUnicode 字元：")
+        result.append("\n\nUnicode 測試：")
         result.append("你好世界")
         result.append("👋🌍")
         
         return "\n".join(result)
 
     def get_random_fact(self) -> str:
-        """Get a random fact from the useless facts API."""
-        try:
-            response = requests.get('https://uselessfacts.jsph.pl/api/v2/facts/random', timeout=5)
-            response.raise_for_status()
-            data = response.json()
-            return data.get('text', '')
-        except Exception as e:
-            print(f"Error fetching random fact: {str(e)}")
-            return self.faker.text(max_nb_chars=100)  # Fallback to faker if API fails
+        """Get a random fact from Faker."""
+        return self.faker.sentence()
 
     def generate_50_char_text(self) -> str:
-        """Generate a meaningful English text using random facts API."""
-        return self.get_random_fact()
+        """Generate a 50-character text with special characters."""
+        text = ""
+        for _ in range(50):
+            if random.random() < 0.3:  # 30% chance of special character
+                text += random.choice(self.special_chars)
+            else:
+                text += random.choice(string.ascii_letters + string.digits)
+        return text
 
     def generate_5000_char_article(self) -> str:
-        """Generate a meaningful 5000-character English article using faker."""
-        # Generate multiple paragraphs until we reach 5000 characters
-        paragraphs = []
-        total_length = 0
-        
-        while total_length < 5000:
-            # Generate a paragraph with a random number of sentences
-            paragraph = self.faker.paragraph(nb_sentences=random.randint(3, 8))
-            paragraphs.append(paragraph)
-            total_length += len(paragraph) + 2  # +2 for newlines
-        
-        # Join paragraphs with double newlines
-        text = "\n\n".join(paragraphs)
-        
-        # Trim to exactly 5000 characters
-        return text[:5000]
+        """Generate a 5000-character article with special characters."""
+        article = []
+        while len("".join(article)) < 5000:
+            if random.random() < 0.1:  # 10% chance of special character
+                article.append(random.choice(self.special_chars))
+            else:
+                if random.random() < 0.7:  # 70% chance of common word
+                    article.append(random.choice(self.common_words))
+                else:
+                    article.append(self.get_random_fact())
+            article.append(" ")
+        return "".join(article)
 
 def main():
     generator = TextGenerator()
     
-    # Generate all content
-    print("Generating test content...")
+    # Generate and save special characters test
+    special_chars = generator.generate_special_chars()
+    generator.save_to_file(special_chars, "special_chars_test.txt")
     
-    # Create content with descriptions
-    content = """# 測試資料產生器輸出
-
-## 1. 特殊字元測試字串
-用途：用於測試 SQL Injection、XSS、跳脫字元等安全性問題
-內容：
-{}
-
-## 2. 50字元英文文字
-用途：用於測試短文字輸入欄位
-內容：
-{}
-
-## 3. 5000字元英文文章
-用途：用於測試長文字輸入欄位
-內容：
-{}
-""".format(
-        generator.generate_special_chars(),
-        generator.generate_50_char_text(),
-        generator.generate_5000_char_article()
-    )
+    # Generate and save 50-character text
+    text_50 = generator.generate_50_char_text()
+    generator.save_to_file(text_50, "text_50_chars.txt")
     
-    # Save to file
-    filepath = generator.save_to_file(content, "test_data.txt")
-    print(f"所有測試資料已儲存至: {filepath}")
+    # Generate and save 5000-character article
+    article_5000 = generator.generate_5000_char_article()
+    generator.save_to_file(article_5000, "article_5000_chars.txt")
 
 if __name__ == "__main__":
     main() 

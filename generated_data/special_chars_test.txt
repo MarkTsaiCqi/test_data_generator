@@ -1,0 +1,34 @@
+John_Doe!@#$%^&*()_+={}[]|\:;"'<>,.?/~`1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+
+
+SQL Injection 測試：
+' OR '1'='1
+' OR 1=1; --
+'; DROP TABLE users; --
+' UNION SELECT * FROM users; --
+' OR 1=1; UPDATE users SET password='hacked' WHERE username='admin'; --
+' OR 'a'='a
+') OR ('a'='a
+') OR '1'='1' --
+
+
+XSS 測試：
+<script>alert('XSS!')</script>
+"><script>alert('XSS')</script>
+<img src="x" onerror="alert('XSS')">
+<a href="javascript:alert('XSS')">Click Me</a>
+<svg onload=alert('XSS')>
+
+
+Command Injection 測試：
+; ls -la
+; rm -rf /
+; cat /etc/passwd
+`whoami`
+$(id)
+| echo HACKED
+
+
+Unicode 測試：
+你好世界
+👋🌍
