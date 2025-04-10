@@ -1,7 +1,10 @@
 Pillow==10.2.0  # 用于生成图片
 numpy==1.26.4   # 用于生成音频
-pydub==0.25.1   # 用于音频处理
+soundfile==0.12.1  # 用于音频处理
 faker==37.1.0   # 用于生成文本
+pandas==2.2.1   # 用于生成Excel文件
+python-docx==1.1.0  # 用于生成Word文档
+reportlab==4.1.0  # 用于生成PDF文件
 python-dotenv==1.0.1
 requests==2.31.0  # 用于网络请求
 beautifulsoup4==4.12.3  # 用于解析HTML 
