@@ -3,7 +3,7 @@ import random
 import os
 
 class ImageGenerator:
-    def __init__(self, output_dir="generated_images"):
+    def __init__(self, output_dir="generated_data"):
         self.output_dir = output_dir
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
