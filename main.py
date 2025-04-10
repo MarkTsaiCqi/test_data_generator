@@ -9,6 +9,11 @@ def generate_test_data():
     img_generator = ImageGenerator()
     img_generator.generate_random_image(800, 600)
     img_generator.generate_gradient_image(800, 600)
+    img_generator.generate_solid_color_image()
+    img_generator.generate_checkerboard_image()
+    img_generator.generate_big_image()
+    img_generator.generate_resolution_image(1920, 1080)
+    img_generator.generate_gif()
     
     # 生成音频
     print("生成测试音频...")
