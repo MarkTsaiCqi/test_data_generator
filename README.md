@@ -1,12 +1,70 @@
-# 測試資料生成工具
+# Test Data Generator
 
-這是一個用於生成各種測試資料的工具，包括文字、圖片和audio檔案。
+這是一個用於生成測試數據的工具集，包括文本、圖像和音頻數據。
 
-## 功能特點
+## 功能
 
-- 生成不同長度的文本文件（1KB, 10KB, 100KB, 1MB）
-- 生成不同大小（基於 Python 腳本預設）的圖片，並嵌入文字標籤
-- （可選）生成不同長度的audio檔案（需要恢復 audio 目錄及相關代碼）
+### 1. 文本生成
+- 使用 `generate_test_string.sh` 腳本生成測試文本
+- 生成包含特殊字符的文本
+- 生成 50 字符的隨機文本
+- 生成 5000 字符的文章（使用預設文本文件）
+
+### 2. 圖像生成
+- 使用 `generate_test_images.sh` 腳本生成測試圖像
+- 生成各種尺寸的圖像
+- 生成包含特殊字符的圖像
+- 生成大尺寸圖像
+
+### 3. 音頻生成
+- 使用 `generate_test_audio.sh` 腳本生成測試音頻
+- 生成 MP3 格式的音頻文件
+- 生成 WAV 格式的音頻文件
+
+## 使用方法
+
+### 文本生成
+```bash
+./generate_test_string.sh
+```
+這將在 `generated_data` 目錄下生成測試文本文件。
+
+### 圖像生成
+```bash
+./generate_test_images.sh
+```
+這將在 `generated_data` 目錄下生成測試圖像文件。
+
+### 音頻生成
+```bash
+./generate_test_audio.sh
+```
+這將在 `generated_data` 目錄下生成測試音頻文件。
+
+## 目錄結構
+
+```
+.
+├── text/                # 文本生成相關代碼和資源
+│   ├── generator.py     # 文本生成器
+│   └── ...             # 其他文本相關文件
+├── image/               # 圖像生成相關代碼和資源
+│   ├── generator.py     # 圖像生成器
+│   └── ...             # 其他圖像相關文件
+├── audio/               # 音頻生成相關代碼和資源
+│   ├── generator.py     # 音頻生成器
+│   └── ...             # 其他音頻相關文件
+├── generated_data/      # 生成的測試數據
+├── generate_test_string.sh    # 文本生成腳本
+├── generate_test_images.sh    # 圖像生成腳本
+└── generate_test_audio.sh     # 音頻生成腳本
+```
+
+## 注意事項
+
+- 所有生成的測試數據都會保存在 `generated_data` 目錄下
+- 確保有足夠的磁盤空間來存儲生成的測試數據
+- 在運行腳本之前，確保已安裝所有必要的依賴項
 
 ## 圖片與 Base64 轉換工具
 
