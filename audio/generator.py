@@ -4,12 +4,164 @@ from pydub import AudioSegment
 import os
 import mido
 from mido import Message, MidiFile, MidiTrack
+from pydub.generators import Sine, WhiteNoise
+import random
+import argparse
+from tqdm import tqdm
 
 class AudioGenerator:
     def __init__(self, output_dir="generated_data"):
         self.output_dir = output_dir
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
+    
+    def _show_progress(self, current: int, total: int, prefix: str = "", suffix: str = ""):
+        """顯示進度條"""
+        bar_length = 50
+        filled_length = int(round(bar_length * current / float(total)))
+        percents = round(100.0 * current / float(total), 1)
+        bar = '=' * filled_length + '-' * (bar_length - filled_length)
+        print(f'\r{prefix} [{bar}] {percents}% {suffix}', end='')
+        if current == total:
+            print()
+    
+    def generate_audio_with_target_size(self, target_size_mb: float, format: str = "mp3") -> str:
+        """生成指定大小的音頻文件
+        
+        Args:
+            target_size_mb: 目標大小（MB）
+            format: 音頻格式
+        """
+        print(f"\n正在生成大小約為 {target_size_mb}MB 的音頻...")
+        
+        # 計算目標字節數
+        target_bytes = target_size_mb * 1024 * 1024
+        
+        # 對於 MP3 格式，我們需要考慮壓縮率
+        # 假設平均壓縮率約為 1:11（未壓縮的 WAV 到 MP3）
+        # 44.1kHz, 16-bit, stereo 的 WAV 每秒約佔 176,400 字節
+        # 所以 MP3 每秒約佔 16,036 字節
+        target_duration_ms = int((target_bytes / 16036) * 1000)
+        
+        print(f"目標音頻長度：{target_duration_ms/1000:.1f}秒")
+        
+        # 生成白噪聲（比正弦波更容易達到目標大小）
+        print("生成白噪聲...")
+        audio = WhiteNoise().to_audio_segment(duration=target_duration_ms)
+        
+        # 保存音頻
+        filename = f"size_{target_size_mb}mb.{format}"
+        filepath = os.path.join(self.output_dir, filename)
+        
+        # 計算初始比特率
+        # MP3 比特率計算公式：比特率(kbps) = (文件大小(bytes) * 8) / (音頻長度(秒) * 1000)
+        initial_bitrate = int((target_bytes * 8) / (target_duration_ms / 1000) / 1000)
+        initial_bitrate = min(max(initial_bitrate, 32), 320)  # 限制在 32-320kbps 範圍內
+        
+        # 調整比特率以達到目標大小
+        bitrate = initial_bitrate
+        min_bitrate = 32
+        max_bitrate = 320
+        tolerance = 0.2  # 增加容差範圍到 0.2MB
+        max_iterations = 5  # 減少最大迭代次數
+        
+        print("\n正在優化音頻文件大小...")
+        pbar = tqdm(range(max_iterations), desc="進度", unit="次")
+        for i in pbar:
+            # 計算比特率百分比 (32kbps = 0%, 320kbps = 100%)
+            bitrate_percent = int((bitrate - 32) / (320 - 32) * 100)
+            pbar.set_postfix({
+                "品質": f"{bitrate_percent}%",
+                "目標": f"{target_size_mb}MB"
+            })
+            audio.export(filepath, format=format, bitrate=f"{bitrate}k")
+            actual_size_mb = os.path.getsize(filepath) / (1024 * 1024)
+            
+            if abs(actual_size_mb - target_size_mb) <= tolerance:
+                print(f"\n✓ 已找到合適的品質: {bitrate_percent}%")
+                break
+            
+            # 根據實際大小調整比特率
+            if actual_size_mb > target_size_mb:
+                max_bitrate = bitrate
+                bitrate = (bitrate + min_bitrate) // 2
+            else:
+                min_bitrate = bitrate
+                bitrate = (bitrate + max_bitrate) // 2
+            
+            if max_bitrate - min_bitrate <= 1:
+                print(f"\n! 無法進一步優化，使用當前品質: {bitrate_percent}%")
+                break
+        
+        print(f"\n✓ 音頻已保存：{filename}")
+        print(f"✓ 實際大小：{actual_size_mb:.2f}MB")
+        print(f"✓ 音頻長度：{target_duration_ms/1000:.1f}秒")
+        return filepath
+    
+    def generate_test_audio(self):
+        """生成各種測試音頻"""
+        # 生成白噪聲
+        print("\n生成白噪聲...")
+        noise = WhiteNoise().to_audio_segment(duration=5000)  # 5秒
+        noise.export(os.path.join(self.output_dir, "white_noise.mp3"), format="mp3")
+        
+        # 生成不同頻率的正弦波
+        frequencies = [220, 440, 880]  # Hz
+        for freq in frequencies:
+            print(f"\n生成 {freq}Hz 正弦波...")
+            sine = Sine(freq).to_audio_segment(duration=5000)  # 5秒
+            sine.export(os.path.join(self.output_dir, f"sine_{freq}hz.mp3"), format="mp3")
+        
+        # 生成光劍音效
+        print("\n生成光劍音效...")
+        lightsaber = self._generate_lightsaber_sound()
+        lightsaber.export(os.path.join(self.output_dir, "lightsaber.wav"), format="wav")
+        lightsaber.export(os.path.join(self.output_dir, "lightsaber.mp3"), format="mp3")
+        lightsaber.export(os.path.join(self.output_dir, "lightsaber.flac"), format="flac")
+        
+        # 生成 MIDI 文件
+        print("\n生成 MIDI 文件...")
+        self._generate_midi_file(os.path.join(self.output_dir, "test_midi.mid"))
+    
+    def _generate_lightsaber_sound(self) -> AudioSegment:
+        """生成光劍音效"""
+        # 創建基礎音頻
+        base = WhiteNoise().to_audio_segment(duration=1000)  # 1秒
+        
+        # 添加頻率掃描效果
+        sweep = Sine(100).to_audio_segment(duration=1000)
+        sweep = sweep._spawn(sweep.raw_data, overrides={
+            "frame_rate": int(sweep.frame_rate * 2)  # 提高採樣率
+        })
+        
+        # 混合音頻
+        result = base.overlay(sweep)
+        
+        # 添加淡入淡出效果
+        result = result.fade_in(100).fade_out(100)
+        
+        return result
+    
+    def _generate_midi_file(self, output_path: str):
+        """生成簡單的 MIDI 文件"""
+        from midiutil import MIDIFile
+        
+        # 創建 MIDI 文件
+        midi = MIDIFile(1)  # 1個音軌
+        
+        # 設置音軌
+        track = 0
+        time = 0
+        midi.addTrackName(track, time, "Test Track")
+        midi.addTempo(track, time, 120)
+        
+        # 添加音符
+        for i in range(8):
+            midi.addNote(track, 0, 60 + i, time + i, 1, 100)  # C4 到 C5
+        
+        # 保存文件
+        with open(output_path, "wb") as output_file:
+            midi.writeFile(output_file)
     
     def generate_midi(self, filename="test_midi"):
         """生成一個簡單的 MIDI 文件"""
@@ -145,28 +297,20 @@ class AudioGenerator:
         return wav_path, mp3_path, flac_path
 
 def main():
+    parser = argparse.ArgumentParser(description='生成測試音頻文件')
+    parser.add_argument('--big', action='store_true', help='生成大音頻文件（用於測試上傳限制）')
+    args = parser.parse_args()
+    
     generator = AudioGenerator()
     
-    # 生成 MIDI 文件（測試用）
-    generator.generate_midi("test_midi")
-    
-    # 生成基本測試音頻（只輸出 MP3）
-    frequencies = [220, 440, 880]
-    for freq in frequencies:
-        signal = generator.generate_sine_wave(freq)
-        wav_path, mp3_path, flac_path = generator.save_audio(signal, f"sine_{freq}hz")
-        os.remove(wav_path)  # 刪除 WAV 文件
-        os.remove(flac_path)  # 刪除 FLAC 文件
-    
-    # 生成白噪聲（只輸出 MP3）
-    noise = generator.generate_white_noise()
-    wav_path, mp3_path, flac_path = generator.save_audio(noise, "white_noise")
-    os.remove(wav_path)  # 刪除 WAV 文件
-    os.remove(flac_path)  # 刪除 FLAC 文件
-    
-    # 生成光劍聲音（輸出所有格式）
-    lightsaber = generator.generate_lightsaber_sound(duration=2.0)
-    generator.save_audio(lightsaber, "lightsaber")
+    if args.big:
+        # 生成大音頻文件
+        generator.generate_audio_with_target_size(24)  # 24MB
+        generator.generate_audio_with_target_size(25)  # 25MB
+        generator.generate_audio_with_target_size(26)  # 26MB
+    else:
+        # 生成測試音頻
+        generator.generate_test_audio()
 
 if __name__ == "__main__":
     main() 
