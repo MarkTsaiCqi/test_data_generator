@@ -9,7 +9,7 @@
 - 支持多種圖片類型：隨機噪點、漸變、純色、棋盤格
 - 支持指定圖片大小（用於測試上傳限制）
   - 大圖片：24MB、25MB、26MB
-  - 小圖片：50KB、100KB、200KB
+  - 小圖片：1900KB、2048KB、2100KB
 
 ### 音頻生成
 - 支持多種格式：MP3、WAV、FLAC、MIDI
@@ -59,9 +59,9 @@ pip install -r requirements.txt
 ./generate_test_smallImage.sh
 ```
 這將生成三個圖片文件：
-- `size_50kb.jpg`（約50KB）
-- `size_100kb.jpg`（約100KB）
-- `size_200kb.jpg`（約200KB）
+- `size_1900kb.jpg`（約1900KB）
+- `size_2048kb.jpg`（約2048KB）
+- `size_2100kb.jpg`（約2100KB）
 
 ### 生成大音頻（用於測試上傳限制）
 ```bash
