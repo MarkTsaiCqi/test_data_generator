@@ -67,6 +67,12 @@ class TextGenerator:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+        # 定義文本文件路徑
+        self.text_files = [
+            "text/orwell_why_i_write.txt",
+            "text/wallace_this_is_water.txt"
+        ]
+
     def save_to_file(self, content: str, filename: str) -> str:
         """Save content to a file and return the file path."""
         filepath = os.path.join(self.output_dir, filename)
@@ -75,6 +81,18 @@ class TextGenerator:
                 content = content.decode('utf-8', errors='ignore')
             f.write(content)
         return filepath
+
+    def read_text_file(self, filepath: str) -> List[str]:
+        """讀取文本文件並返回段落列表"""
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # 按空行分割段落
+                paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+                return paragraphs
+        except Exception as e:
+            print(f"讀取文件 {filepath} 失敗: {e}")
+            return []
 
     def generate_special_chars(self) -> str:
         """Generate a string containing all special characters and alphanumeric characters."""
@@ -131,15 +149,38 @@ class TextGenerator:
         return fact
 
     def generate_5000_char_article(self) -> str:
-        """Generate a 5000-character article using random facts and common words."""
+        """Generate a 5000-character article using random text files."""
+        # 隨機選擇一個文本文件
+        filepath = random.choice(self.text_files)
+        paragraphs = self.read_text_file(filepath)
+        
+        if not paragraphs:
+            return "無法生成文章：文本文件讀取失敗"
+            
+        # 隨機選擇起始段落
+        start_idx = random.randint(0, len(paragraphs) - 1)
+        
         article = []
-        while len("".join(article)) < 5000:
-            if random.random() < 0.7:  # 70% chance of common word
-                article.append(random.choice(self.common_words))
-            else:
-                article.append(self.get_random_fact())
-            article.append(" ")
-        return "".join(article)
+        current_length = 0
+        
+        # 從起始段落開始，逐段添加直到達到5000字符
+        for i in range(start_idx, len(paragraphs)):
+            paragraph = paragraphs[i]
+            if current_length + len(paragraph) > 5000:
+                break
+            article.append(paragraph)
+            current_length += len(paragraph)
+            
+        # 如果還沒達到5000字符，從頭開始繼續添加
+        if current_length < 5000:
+            for i in range(0, start_idx):
+                paragraph = paragraphs[i]
+                if current_length + len(paragraph) > 5000:
+                    break
+                article.append(paragraph)
+                current_length += len(paragraph)
+        
+        return "\n\n".join(article)
 
 def main():
     generator = TextGenerator()
