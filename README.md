@@ -1,12 +1,12 @@
 # 測試資料生成工具
 
-這是一個用於生成各種測試資料的工具，包括文字、圖片和音頻檔案。
+這是一個用於生成各種測試資料的工具，包括文字、圖片和audio檔案。
 
 ## 功能特點
 
 - 生成不同長度的文本文件（1KB, 10KB, 100KB, 1MB）
 - 生成不同大小（基於 Python 腳本預設）的圖片，並嵌入文字標籤
-- （可選）生成不同長度的音頻檔案（需要恢復 audio 目錄及相關代碼）
+- （可選）生成不同長度的audio檔案（需要恢復 audio 目錄及相關代碼）
 
 ## 圖片與 Base64 轉換工具
 
@@ -29,7 +29,7 @@
 
 ## 安裝說明
 
-1. 克隆此倉庫：
+1. 複製這個repository：
 ```bash
 git clone [repository_url]
 cd test_data_generator
@@ -44,7 +44,7 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-3. 安裝依賴：
+3. 安裝必要元件：
 ```bash
 pip install -r requirements.txt
 # 如果需要處理 b64_json，確保安裝了 jq
@@ -77,7 +77,7 @@ cd scripts
 ## 依賴套件
 
 - Pillow：用於生成圖片
-- numpy：用於生成音頻（如果恢復該功能）
-- pydub：用於音頻處理（如果恢復該功能）
+- numpy：用於生成audio（如果恢復該功能）
+- pydub：用於audio處理（如果恢復該功能）
 - faker：用於生成文本（如果恢復使用該腳本）
 - jq (外部工具)：用於處理 JSON (b64_json 轉換需要) 
