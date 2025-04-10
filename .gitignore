@@ -2,10 +2,35 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Generated files
-generated_images/
-generated_text/
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Virtual environment files
-venv/ 
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated data
+generated_data/
+generated_images/
+generated_text/ 
