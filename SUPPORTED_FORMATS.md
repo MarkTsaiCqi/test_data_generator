@@ -26,4 +26,16 @@
 - LaTeX：.tex
 - 純文本：.txt
 - XML：.xml
-- CSV：.csv 
+- CSV：.csv
+
+## 無效文件格式（用於負面測試）
+- 執行檔：
+  - Windows：.exe、.bat、.dll
+  - Android：.apk
+- 影片檔：
+  - .mp4
+  - .mov
+  - .avi
+  - .mkv
+
+注意：這些無效文件格式生成的文件僅包含基本的文件頭或隨機數據，不能正常執行或播放，僅用於測試文件上傳限制和格式驗證。 

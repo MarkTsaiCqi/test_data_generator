@@ -18,6 +18,24 @@ class FileGenerator:
         """生成隨機文本"""
         return ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation + ' ', k=length))
 
+    def _generate_random_binary(self, length: int) -> bytes:
+        """生成隨機二進制數據"""
+        return bytes(random.getrandbits(8) for _ in range(length))
+
+    def _generate_invalid_executable(self, filepath: str):
+        """生成無效的執行檔"""
+        # 生成一個小的無效二進制文件
+        with open(filepath, 'wb') as f:
+            f.write(self._generate_random_binary(1024))
+
+    def _generate_invalid_video(self, filepath: str):
+        """生成無效的影片文件"""
+        # 生成一個無效的影片文件頭
+        with open(filepath, 'wb') as f:
+            # 寫入一些無效的影片文件頭數據
+            f.write(b'\x00\x00\x00\x20\x66\x74\x79\x70')  # 模擬 MP4 文件頭
+            f.write(self._generate_random_binary(1024))
+
     def _generate_code(self, language: str) -> str:
         """生成不同語言的示例代碼"""
         code_templates = {
@@ -239,6 +257,21 @@ console.log(greet("World"));
 
         return filepath
 
+    def generate_invalid_file(self, file_type: str) -> str:
+        """生成無效的測試文件"""
+        file_type = file_type.lower().lstrip('.')
+        filename = f"test_file.{file_type}"
+        filepath = os.path.join(self.output_dir, filename)
+
+        if file_type in ['exe', 'bat', 'apk', 'dll']:
+            self._generate_invalid_executable(filepath)
+        elif file_type in ['mp4', 'mov', 'avi', 'mkv']:
+            self._generate_invalid_video(filepath)
+        else:
+            raise ValueError(f"不支持的無效文件類型: {file_type}")
+
+        return filepath
+
     def generate_all(self) -> list:
         """生成所有支持的文件類型"""
         file_types = [
@@ -260,6 +293,31 @@ console.log(greet("World"));
         
         return generated_files
 
+    def generate_all_invalid(self) -> list:
+        """生成所有無效的測試文件"""
+        file_types = [
+            # 執行檔
+            'exe', 'bat', 'apk', 'dll',
+            # 影片檔
+            'mp4', 'mov', 'avi', 'mkv'
+        ]
+        generated_files = []
+        
+        for file_type in file_types:
+            try:
+                filepath = self.generate_invalid_file(file_type)
+                generated_files.append(filepath)
+                print(f"Generated invalid {file_type.upper()} file: {filepath}")
+            except Exception as e:
+                print(f"Error generating invalid {file_type.upper()} file: {str(e)}")
+        
+        return generated_files
+
 if __name__ == "__main__":
-    generator = FileGenerator()
-    generator.generate_all() 
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == '--invalid':
+        generator = FileGenerator("generated_data/not_supported")
+        generator.generate_all_invalid()
+    else:
+        generator = FileGenerator()
+        generator.generate_all() 
