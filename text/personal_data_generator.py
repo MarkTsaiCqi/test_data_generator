@@ -5,6 +5,104 @@ from datetime import datetime, timedelta
 class PersonalDataGenerator:
     def __init__(self, output_dir="generated_data"):
         self.output_dir = output_dir
+        self.interests = {
+            "tw": ["登山", "單車", "攝影", "咖啡", "手作", "閱讀", "電影", "音樂", "旅行", "美食"],
+            "cn": ["書法", "太極", "圍棋", "茶道", "國畫", "京劇", "太極拳", "象棋", "剪紙", "園藝"],
+            "uk": ["足球", "板球", "網球", "高爾夫", "閱讀", "園藝", "攝影", "騎馬", "划船", "品酒"],
+            "us": ["棒球", "籃球", "美式足球", "衝浪", "露營", "攝影", "音樂", "電影", "健身", "烹飪"],
+            "jp": ["茶道", "花道", "書道", "劍道", "弓道", "和服", "動漫", "遊戲", "攝影", "旅行"]
+        }
+        self.companies = {
+            "tw": ["科技公司", "金融機構", "製造業", "服務業", "教育機構", "醫療機構", "媒體公司", "零售業", "餐飲業", "建築業"],
+            "cn": ["科技公司", "國有企業", "金融機構", "製造業", "教育機構", "醫療機構", "媒體公司", "零售業", "餐飲業", "建築業"],
+            "uk": ["Technology Company", "Financial Institution", "Manufacturing", "Service Industry", "Education", "Healthcare", "Media Company", "Retail", "Hospitality", "Construction"],
+            "us": ["Tech Company", "Financial Institution", "Manufacturing", "Service Industry", "Education", "Healthcare", "Media Company", "Retail", "Hospitality", "Construction"],
+            "jp": ["テクノロジー企業", "金融機関", "製造業", "サービス業", "教育機関", "医療機関", "メディア企業", "小売業", "飲食業", "建設業"]
+        }
+        self.positions = {
+            "tw": ["工程師", "經理", "專員", "顧問", "主任", "助理", "主管", "總監", "副總", "總經理"],
+            "cn": ["工程师", "经理", "专员", "顾问", "主任", "助理", "主管", "总监", "副总", "总经理"],
+            "uk": ["Engineer", "Manager", "Specialist", "Consultant", "Director", "Assistant", "Supervisor", "Head", "VP", "CEO"],
+            "us": ["Engineer", "Manager", "Specialist", "Consultant", "Director", "Assistant", "Supervisor", "Head", "VP", "CEO"],
+            "jp": ["エンジニア", "マネージャー", "スペシャリスト", "コンサルタント", "ディレクター", "アシスタント", "スーパーバイザー", "ヘッド", "VP", "CEO"]
+        }
+        self.email_domains = {
+            "tw": ["gmail.com", "yahoo.com.tw", "hotmail.com", "msn.com", "pchome.com.tw"],
+            "cn": ["163.com", "qq.com", "126.com", "sina.com", "sohu.com"],
+            "uk": ["gmail.com", "yahoo.co.uk", "hotmail.co.uk", "outlook.com", "btinternet.com"],
+            "us": ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com"],
+            "jp": ["gmail.com", "yahoo.co.jp", "hotmail.co.jp", "outlook.jp", "docomo.ne.jp"]
+        }
+
+    def generate_email(self, region="tw"):
+        """生成隨機電子郵件地址"""
+        first_names = {
+            "tw": ["陳", "林", "黃", "張", "李", "王", "吳", "劉", "蔡", "楊"],
+            "cn": ["王", "李", "張", "劉", "陳", "楊", "趙", "黃", "周", "吳"],
+            "uk": ["John", "David", "Michael", "James", "Robert", "William", "Thomas", "Christopher", "Daniel", "Paul"],
+            "us": ["John", "Michael", "David", "James", "Robert", "William", "Thomas", "Christopher", "Daniel", "Paul"],
+            "jp": ["佐藤", "鈴木", "高橋", "田中", "伊藤", "渡邊", "山本", "中村", "小林", "加藤"]
+        }
+        last_names = {
+            "tw": ["小明", "大華", "志明", "美玲", "雅婷", "家豪", "怡君", "建國", "淑芬", "俊傑"],
+            "cn": ["小明", "大華", "志明", "美玲", "雅婷", "家豪", "怡君", "建國", "淑芬", "俊傑"],
+            "uk": ["Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright"],
+            "us": ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"],
+            "jp": ["一郎", "二郎", "三郎", "花子", "太郎", "次郎", "美咲", "翔太", "優子", "健太"]
+        }
+        
+        first_name = random.choice(first_names[region])
+        last_name = random.choice(last_names[region])
+        number = random.randint(100, 999)
+        domain = random.choice(self.email_domains[region])
+        
+        return f"{first_name}{last_name}{number}@{domain}"
+
+    def generate_birthday(self, region="tw"):
+        """生成隨機生日"""
+        # 生成 18-65 歲之間的生日
+        age = random.randint(18, 65)
+        today = datetime.now()
+        birth_year = today.year - age
+        birth_month = random.randint(1, 12)
+        birth_day = random.randint(1, 28)  # 簡單起見，統一使用 28 天
+        
+        if region in ["tw", "cn"]:
+            return f"{birth_year}/{birth_month:02d}/{birth_day:02d}"
+        elif region in ["uk", "us"]:
+            return f"{birth_month:02d}/{birth_day:02d}/{birth_year}"
+        elif region == "jp":
+            return f"{birth_year}年{birth_month}月{birth_day}日"
+
+    def generate_id_number(self, region="tw"):
+        """生成隨機身份證字號（僅用於測試）"""
+        if region == "tw":
+            # 台灣身份證字號格式：A123456789
+            first_char = random.choice("ABCDEFGHJKLMNPQRSTUVXYWZIO")
+            numbers = ''.join([str(random.randint(0, 9)) for _ in range(9)])
+            return f"{first_char}{numbers}"
+        elif region == "cn":
+            # 中國身份證字號格式：18位數字
+            return ''.join([str(random.randint(0, 9)) for _ in range(18)])
+        elif region == "jp":
+            # 日本住民票番號格式：12位數字
+            return ''.join([str(random.randint(0, 9)) for _ in range(12)])
+        else:
+            return None
+
+    def generate_company_info(self, region="tw"):
+        """生成公司資訊"""
+        company = random.choice(self.companies[region])
+        position = random.choice(self.positions[region])
+        return {
+            "company": company,
+            "position": position
+        }
+
+    def generate_interests(self, region="tw"):
+        """生成興趣愛好"""
+        num_interests = random.randint(2, 5)
+        return random.sample(self.interests[region], num_interests)
 
     def generate_phone_number(self, region="tw"):
         """生成隨機電話號碼"""
@@ -127,10 +225,17 @@ class PersonalDataGenerator:
 
     def generate_personal_data(self, region="tw"):
         """生成完整的個人資料"""
+        company_info = self.generate_company_info(region)
         return {
             "region": region,
+            "email": self.generate_email(region),
+            "birthday": self.generate_birthday(region),
+            "id_number": self.generate_id_number(region),
             "phone": self.generate_phone_number(region),
             "address": self.generate_address(region),
+            "company": company_info["company"],
+            "position": company_info["position"],
+            "interests": self.generate_interests(region),
             "credit_card": self.generate_credit_card()
         }
 
@@ -152,8 +257,15 @@ class PersonalDataGenerator:
             all_data[region_code] = data
             
             txt_content += f"\n=== {region_name} ===\n"
+            txt_content += f"電子郵件：{data['email']}\n"
+            txt_content += f"生日：{data['birthday']}\n"
+            if data['id_number']:
+                txt_content += f"身份證字號：{data['id_number']}\n"
             txt_content += f"電話號碼：{data['phone']}\n"
             txt_content += f"地址：{data['address']}\n"
+            txt_content += f"公司：{data['company']}\n"
+            txt_content += f"職位：{data['position']}\n"
+            txt_content += f"興趣：{', '.join(data['interests'])}\n"
             txt_content += f"信用卡號：{data['credit_card']['number']}\n"
             txt_content += f"到期日：{data['credit_card']['expiry']}\n"
             txt_content += f"CVV：{data['credit_card']['cvv']}\n"
