@@ -313,11 +313,29 @@ console.log(greet("World"));
         
         return generated_files
 
+def create_pdf_from_text_file(input_file, output_file):
+    with open(input_file, 'r', encoding='utf-8') as f:
+        text_content = f.read()
+
+    # 創建 PDF
+    c = canvas.Canvas(output_file, pagesize=letter)
+    width, height = letter
+    c.setFont("Helvetica", 12)
+    text_object = c.beginText(40, height - 40)
+
+    for line in text_content.splitlines():
+        text_object.textLine(line)
+    c.drawText(text_object)
+    c.save()
+    print(f'PDF 檔案已生成：{output_file}')
+
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--invalid':
-        generator = FileGenerator("generated_data/not_supported")
-        generator.generate_all_invalid()
-    else:
-        generator = FileGenerator()
-        generator.generate_all() 
+
+    if len(sys.argv) < 3:
+        print("請提供輸入檔案和輸出檔案名稱。")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+    create_pdf_from_text_file(input_file, output_file) 
