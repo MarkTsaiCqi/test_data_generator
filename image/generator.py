@@ -3,6 +3,7 @@ import random
 import os
 from typing import Tuple, Optional
 import time
+import numpy as np
 
 class ImageGenerator:
     def __init__(self, output_dir="generated_data"):
@@ -143,6 +144,75 @@ class ImageGenerator:
                       duration=duration, loop=0)
         print(f"GIF 動畫已保存：{filename}")
         return filepath
+    
+    def generate_image_with_target_size(self, target_size: float, format: str = "JPEG") -> str:
+        """生成指定大小的圖片（MB）
+        
+        Args:
+            target_size: 目標大小（MB）
+            format: 圖片格式
+        """
+        print(f"\n正在生成大小約為 {target_size}MB 的圖片...")
+        
+        # 計算目標字節數
+        target_bytes = target_size * 1024 * 1024
+        
+        # 計算目標像素數（考慮 JPEG 壓縮，每個像素約佔 1 字節）
+        target_pixels = int(target_bytes)
+        
+        # 計算圖片尺寸（保持 1:1 比例）
+        size = int(np.sqrt(target_pixels))
+        
+        # 增加初始尺寸（考慮 JPEG 壓縮和額外像素）
+        size = int(size * 2.0)  # 增加到 2 倍
+        
+        # 創建圖片
+        image = Image.new('RGB', (size, size))
+        draw = ImageDraw.Draw(image)
+        
+        # 填充隨機顏色
+        total_pixels = size * size
+        processed = 0
+        
+        for x in range(size):
+            for y in range(size):
+                draw.point((x, y), fill=self.generate_random_color())
+                processed += 1
+                if processed % 1000 == 0:
+                    self._show_progress(processed, total_pixels, "進度：")
+        
+        # 保存圖片
+        filename = f"size_{target_size}mb.{format.lower()}"
+        filepath = os.path.join(self.output_dir, filename)
+        
+        # 調整質量以達到目標大小
+        quality = 95
+        min_quality = 1
+        max_quality = 100
+        tolerance = 0.1  # 允許 0.1 MB 的誤差
+        
+        while True:
+            image.save(filepath, format, quality=quality)
+            actual_size = os.path.getsize(filepath) / (1024 * 1024)
+            
+            if abs(actual_size - target_size) <= tolerance:
+                break
+            
+            # 根據實際大小調整質量
+            if actual_size > target_size:
+                max_quality = quality
+                quality = (quality + min_quality) // 2
+            else:
+                min_quality = quality
+                quality = (quality + max_quality) // 2
+            
+            if max_quality - min_quality <= 1:
+                break
+        
+        print(f"\n圖片已保存：{filename}")
+        print(f"實際大小：{actual_size:.2f}MB")
+        print(f"圖片尺寸：{size}x{size}")
+        return filepath
 
 def main():
     generator = ImageGenerator()
@@ -155,6 +225,12 @@ def main():
     generator.generate_big_image()
     generator.generate_resolution_image(1920, 1080)
     generator.generate_gif()
+    
+    # 生成接近10MB大小限制的圖片
+    print("\n=== 生成接近10MB大小限制的測試圖片 ===")
+    generator.generate_image_with_target_size(9.9)  # 9.9MB
+    generator.generate_image_with_target_size(10.0) # 10.0MB
+    generator.generate_image_with_target_size(10.1) # 10.1MB
 
 if __name__ == "__main__":
     main() 
